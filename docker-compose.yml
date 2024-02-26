@@ -1,0 +1,43 @@
+version: '3.9'
+services:
+  client-react:
+    image: client-react
+    build: ./client-react
+    init: true
+    networks:
+      - frontend
+    ports:
+      - 80:8080
+    restart: unless-stopped
+
+  node-api:
+    image: node-api
+    build: ./node-api/
+    init: true
+    depends_on:
+      - db
+    environment:
+      - DB_URL=postgres://postgres:pass@db:5432/postgres
+    networks:
+      - frontend
+      - backend
+    ports:
+      - 3000:3000
+    restart: unless-stopped
+
+  db:
+    image: postgres:15.1-alpine
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - backend
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=pass
+
+volumes:
+  pgdata:
+networks:
+  frontend:
+  backend:
